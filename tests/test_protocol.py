@@ -4,7 +4,7 @@ import csv
 import json
 
 from recall_gen.designer import StudyDesign
-from recall_gen.protocol import ProtocolGenerator, StudyProtocol
+from recall_gen.protocol import ProtocolGenerator
 
 
 def _make_design():

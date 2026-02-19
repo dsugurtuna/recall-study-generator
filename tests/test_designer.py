@@ -1,7 +1,7 @@
 """Tests for StudyDesigner and EligibilityFilter."""
 
-from recall_gen.designer import StudyDesigner, StudyDesign, ParticipantRecord
-from recall_gen.eligibility import EligibilityFilter, EligibilityResult
+from recall_gen.designer import StudyDesigner, ParticipantRecord
+from recall_gen.eligibility import EligibilityFilter
 
 
 def _make_participants():

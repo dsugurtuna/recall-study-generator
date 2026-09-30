@@ -9,7 +9,7 @@ import csv
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import ClassVar
 
 from .designer import StudyDesign
 
@@ -20,9 +20,9 @@ class StudyProtocol:
 
     study_name: str = ""
     version: str = "1.0"
-    groups: Dict[str, List[str]] = field(default_factory=dict)
+    groups: dict[str, list[str]] = field(default_factory=dict)
     total_participants: int = 0
-    sections: Dict[str, str] = field(default_factory=dict)
+    sections: dict[str, str] = field(default_factory=dict)
 
 
 class ProtocolGenerator:
@@ -34,7 +34,7 @@ class ProtocolGenerator:
         Section templates for the protocol document.
     """
 
-    DEFAULT_SECTIONS = {
+    DEFAULT_SECTIONS: ClassVar[dict[str, str]] = {
         "objective": "Investigate genotype-phenotype associations through targeted recall.",
         "design": "Balanced genotype-stratified cohort with matched controls.",
         "eligibility": "Consented biobank participants within specified age range.",
@@ -44,7 +44,7 @@ class ProtocolGenerator:
 
     def __init__(
         self,
-        template_sections: Dict[str, str] | None = None,
+        template_sections: dict[str, str] | None = None,
     ) -> None:
         self.sections = template_sections or dict(self.DEFAULT_SECTIONS)
 

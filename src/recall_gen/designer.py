@@ -7,7 +7,6 @@ applying stratification by age, sex, and ethnicity.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass
@@ -28,12 +27,12 @@ class StudyDesign:
 
     study_name: str = ""
     target_per_group: int = 0
-    groups: Dict[str, List[str]] = field(default_factory=dict)
+    groups: dict[str, list[str]] = field(default_factory=dict)
     total_selected: int = 0
-    balance_summary: Dict[str, Dict[str, int]] = field(default_factory=dict)
+    balance_summary: dict[str, dict[str, int]] = field(default_factory=dict)
 
     @property
-    def group_sizes(self) -> Dict[str, int]:
+    def group_sizes(self) -> dict[str, int]:
         return {g: len(ids) for g, ids in self.groups.items()}
 
 
@@ -67,13 +66,11 @@ class StudyDesigner:
     def _is_eligible(self, p: ParticipantRecord) -> bool:
         if p.consent_status != self.required_consent:
             return False
-        if p.age < self.min_age or p.age > self.max_age:
-            return False
-        return True
+        return not (p.age < self.min_age or p.age > self.max_age)
 
     def design(
         self,
-        participants: List[ParticipantRecord],
+        participants: list[ParticipantRecord],
         study_name: str = "Recall Study",
     ) -> StudyDesign:
         """Generate a balanced study design.
@@ -81,7 +78,7 @@ class StudyDesigner:
         Selects up to target_per_group eligible participants per
         genotype group, prioritising age/sex balance.
         """
-        eligible: Dict[str, List[ParticipantRecord]] = {}
+        eligible: dict[str, list[ParticipantRecord]] = {}
         for p in participants:
             if self._is_eligible(p):
                 eligible.setdefault(p.genotype_group, []).append(p)
@@ -96,7 +93,7 @@ class StudyDesigner:
             selected = pool[: self.target_per_group]
             design.groups[group] = [p.participant_id for p in selected]
 
-            sex_counts: Dict[str, int] = {}
+            sex_counts: dict[str, int] = {}
             for p in selected:
                 sex_counts[p.sex] = sex_counts.get(p.sex, 0) + 1
             design.balance_summary[group] = sex_counts

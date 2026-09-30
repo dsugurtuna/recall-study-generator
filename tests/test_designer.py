@@ -1,6 +1,6 @@
 """Tests for StudyDesigner and EligibilityFilter."""
 
-from recall_gen.designer import StudyDesigner, ParticipantRecord
+from recall_gen.designer import ParticipantRecord, StudyDesigner
 from recall_gen.eligibility import EligibilityFilter
 
 
@@ -45,7 +45,7 @@ class TestStudyDesigner:
     def test_target_per_group(self):
         designer = StudyDesigner(target_per_group=1)
         design = designer.design(_make_participants())
-        for group, ids in design.groups.items():
+        for _group, ids in design.groups.items():
             assert len(ids) <= 1
 
     def test_group_sizes(self):

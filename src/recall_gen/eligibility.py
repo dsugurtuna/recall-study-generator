@@ -28,6 +28,7 @@ class EligibilityResult:
     total_eligible: int = 0
     excluded_per_stage: dict[str, int] = field(default_factory=dict)
     eligible_ids: list[str] = field(default_factory=list)
+    eligible: list[ParticipantRecord] = field(default_factory=list)  # to pass on
 
     @property
     def exclusion_rate(self) -> float:
@@ -77,4 +78,5 @@ class EligibilityFilter:
 
         result.total_eligible = len(remaining)
         result.eligible_ids = [p.participant_id for p in remaining]
+        result.eligible = remaining
         return result

@@ -36,7 +36,7 @@ class ProtocolGenerator:
 
     DEFAULT_SECTIONS: ClassVar[dict[str, str]] = {
         "objective": "Investigate genotype-phenotype associations through targeted recall.",
-        "design": "Balanced genotype-stratified cohort with matched controls.",
+        "design": "Genotype groups, each balanced on sex and spread across the age range.",
         "eligibility": "Consented biobank participants within specified age range.",
         "procedures": "Participant invitation, consent verification, phenotyping visit.",
         "data_handling": "All data handled in accordance with institutional governance.",
@@ -62,10 +62,22 @@ class ProtocolGenerator:
     def export_participant_list(
         design: StudyDesign,
         output_path: str | Path,
+        blinded: bool = False,
     ) -> None:
-        """Export participant assignments to CSV."""
+        """Export participant assignments to CSV.
+
+        With ``blinded=True`` the file has participant IDs only, sorted by
+        ID, so staff who invite participants cannot infer genotype group
+        from either a column or the row order.
+        """
         with open(output_path, "w", newline="") as fh:
             writer = csv.writer(fh)
+            if blinded:
+                writer.writerow(["participant_id"])
+                all_ids = sorted(pid for ids in design.groups.values() for pid in ids)
+                for pid in all_ids:
+                    writer.writerow([pid])
+                return
             writer.writerow(["participant_id", "genotype_group"])
             for group, ids in sorted(design.groups.items()):
                 for pid in sorted(ids):

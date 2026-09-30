@@ -46,3 +46,13 @@ class TestProtocolGenerator:
         gen = ProtocolGenerator(template_sections={"custom": "Custom section."})
         protocol = gen.generate(_make_design())
         assert "custom" in protocol.sections
+
+    def test_blinded_export_has_no_group(self, tmp_path):
+        out = tmp_path / "blinded.csv"
+        ProtocolGenerator.export_participant_list(_make_design(), out, blinded=True)
+        lines = out.read_text().splitlines()
+        assert lines == ["participant_id", "P001", "P002", "P003"]
+
+    def test_default_protocol_does_not_claim_matched_controls(self):
+        protocol = ProtocolGenerator().generate(_make_design())
+        assert "matched" not in protocol.sections["design"]

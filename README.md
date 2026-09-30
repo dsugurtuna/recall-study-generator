@@ -116,12 +116,6 @@ flowchart LR
 - Over-recruitment factors per group with a reserve list.
 - A CLI that reads a participant CSV and writes the three outputs.
 
-## Jira provenance
-
-| Ticket | Description |
-| :--- | :--- |
-| BIOIN-493 | Recall study generation for APOE and HLA genotype groups |
-
 ## Development
 
 ```bash

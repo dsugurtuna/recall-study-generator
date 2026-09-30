@@ -9,7 +9,7 @@ import csv
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import ClassVar
 
 from .designer import StudyDesign
 
@@ -20,9 +20,9 @@ class StudyProtocol:
 
     study_name: str = ""
     version: str = "1.0"
-    groups: Dict[str, List[str]] = field(default_factory=dict)
+    groups: dict[str, list[str]] = field(default_factory=dict)
     total_participants: int = 0
-    sections: Dict[str, str] = field(default_factory=dict)
+    sections: dict[str, str] = field(default_factory=dict)
 
 
 class ProtocolGenerator:
@@ -34,9 +34,9 @@ class ProtocolGenerator:
         Section templates for the protocol document.
     """
 
-    DEFAULT_SECTIONS = {
+    DEFAULT_SECTIONS: ClassVar[dict[str, str]] = {
         "objective": "Investigate genotype-phenotype associations through targeted recall.",
-        "design": "Balanced genotype-stratified cohort with matched controls.",
+        "design": "Genotype groups, each balanced on sex and spread across the age range.",
         "eligibility": "Consented biobank participants within specified age range.",
         "procedures": "Participant invitation, consent verification, phenotyping visit.",
         "data_handling": "All data handled in accordance with institutional governance.",
@@ -44,7 +44,7 @@ class ProtocolGenerator:
 
     def __init__(
         self,
-        template_sections: Dict[str, str] | None = None,
+        template_sections: dict[str, str] | None = None,
     ) -> None:
         self.sections = template_sections or dict(self.DEFAULT_SECTIONS)
 
@@ -62,10 +62,22 @@ class ProtocolGenerator:
     def export_participant_list(
         design: StudyDesign,
         output_path: str | Path,
+        blinded: bool = False,
     ) -> None:
-        """Export participant assignments to CSV."""
+        """Export participant assignments to CSV.
+
+        With ``blinded=True`` the file has participant IDs only, sorted by
+        ID, so staff who invite participants cannot infer genotype group
+        from either a column or the row order.
+        """
         with open(output_path, "w", newline="") as fh:
             writer = csv.writer(fh)
+            if blinded:
+                writer.writerow(["participant_id"])
+                all_ids = sorted(pid for ids in design.groups.values() for pid in ids)
+                for pid in all_ids:
+                    writer.writerow([pid])
+                return
             writer.writerow(["participant_id", "genotype_group"])
             for group, ids in sorted(design.groups.items()):
                 for pid in sorted(ids):

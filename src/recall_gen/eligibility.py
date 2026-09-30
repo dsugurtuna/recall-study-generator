@@ -5,8 +5,8 @@ Applies multi-stage exclusion criteria for recall study participation.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Set
 
 from .designer import ParticipantRecord
 
@@ -26,8 +26,9 @@ class EligibilityResult:
 
     total_input: int = 0
     total_eligible: int = 0
-    excluded_per_stage: Dict[str, int] = field(default_factory=dict)
-    eligible_ids: List[str] = field(default_factory=list)
+    excluded_per_stage: dict[str, int] = field(default_factory=dict)
+    eligible_ids: list[str] = field(default_factory=list)
+    eligible: list[ParticipantRecord] = field(default_factory=list)  # to pass on
 
     @property
     def exclusion_rate(self) -> float:
@@ -44,14 +45,14 @@ class EligibilityFilter:
     """
 
     def __init__(self) -> None:
-        self.stages: List[ExclusionStage] = []
+        self.stages: list[ExclusionStage] = []
 
     def add_stage(
         self,
         name: str,
         predicate: Callable[[ParticipantRecord], bool],
         description: str = "",
-    ) -> "EligibilityFilter":
+    ) -> EligibilityFilter:
         """Add an exclusion stage.
 
         The predicate should return True if the participant is EXCLUDED.
@@ -59,16 +60,14 @@ class EligibilityFilter:
         self.stages.append(ExclusionStage(name=name, predicate=predicate, description=description))
         return self
 
-    def apply(
-        self, participants: List[ParticipantRecord]
-    ) -> EligibilityResult:
+    def apply(self, participants: list[ParticipantRecord]) -> EligibilityResult:
         """Apply all stages sequentially."""
         result = EligibilityResult(total_input=len(participants))
         remaining = list(participants)
 
         for stage in self.stages:
-            excluded_ids: Set[str] = set()
-            kept: List[ParticipantRecord] = []
+            excluded_ids: set[str] = set()
+            kept: list[ParticipantRecord] = []
             for p in remaining:
                 if stage.predicate(p):
                     excluded_ids.add(p.participant_id)
@@ -79,4 +78,5 @@ class EligibilityFilter:
 
         result.total_eligible = len(remaining)
         result.eligible_ids = [p.participant_id for p in remaining]
+        result.eligible = remaining
         return result
